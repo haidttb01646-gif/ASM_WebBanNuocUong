@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASM_WebBanNuocUong.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260202111333_Database")]
+    [Migration("20260202121221_Database")]
     partial class Database
     {
         /// <inheritdoc />
@@ -31,23 +31,20 @@ namespace ASM_WebBanNuocUong.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ComboMaCombo")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("MaCombo")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("MaSanPham")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("SanPhamMaSanPham")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("SoLuong")
+                        .HasColumnType("int");
 
                     b.HasKey("MaChiTietCombo");
 
-                    b.HasIndex("ComboMaCombo");
+                    b.HasIndex("MaCombo");
 
-                    b.HasIndex("SanPhamMaSanPham");
+                    b.HasIndex("MaSanPham");
 
                     b.ToTable("ComboDetails", (string)null);
                 });
@@ -58,20 +55,22 @@ namespace ASM_WebBanNuocUong.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("DonHangMaDonHang")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<decimal>("Gia")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("LoaiSanPham")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<Guid?>("MaCombo")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("MaDonHang")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("MaSanPham")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SanPhamMaSanPham")
+                    b.Property<Guid?>("MaSanPham")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("SoLuong")
@@ -79,11 +78,18 @@ namespace ASM_WebBanNuocUong.Migrations
 
                     b.HasKey("MaChiTietDonHang");
 
-                    b.HasIndex("DonHangMaDonHang");
+                    b.HasIndex("MaCombo");
 
-                    b.HasIndex("SanPhamMaSanPham");
+                    b.HasIndex("MaDonHang");
 
-                    b.ToTable("OrderDetails", (string)null);
+                    b.HasIndex("MaSanPham");
+
+                    b.ToTable("OrderDetails", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ChiTietDonHang_LoaiSanPham", "(LoaiSanPham = 'SanPham' AND MaSanPham IS NOT NULL) OR (LoaiSanPham = 'Combo' AND MaCombo IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_ChiTietDonHang_SanPhamOrCombo", "([MaSanPham] IS NOT NULL AND [MaCombo] IS NULL) OR ([MaSanPham] IS NULL AND [MaCombo] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("ASM_WebBanNuocUong.Models.Combo", b =>
@@ -96,14 +102,35 @@ namespace ASM_WebBanNuocUong.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("MoTa")
+                    b.Property<string>("HinhAnh")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MoTa")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("NgayCapNhat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayTao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("TenCombo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("TrangThai")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.HasKey("MaCombo");
+
+                    b.HasIndex("TenCombo")
+                        .IsUnique();
 
                     b.ToTable("Combos", (string)null);
                 });
@@ -114,11 +141,28 @@ namespace ASM_WebBanNuocUong.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("NgayCapNhat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayTao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
                     b.Property<string>("TenDanhMuc")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("TrangThai")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.HasKey("MaDanhMuc");
+
+                    b.HasIndex("TenDanhMuc")
+                        .IsUnique();
 
                     b.ToTable("Categories", (string)null);
                 });
@@ -129,22 +173,35 @@ namespace ASM_WebBanNuocUong.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<Guid>("MaNguoiDung")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("NgayDat")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<DateTime?>("NgayGiao")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("NguoiDungMaNguoiDung")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<decimal>("TongTien")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("TrangThai")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Chờ xác nhận");
 
                     b.HasKey("MaDonHang");
 
-                    b.HasIndex("NguoiDungMaNguoiDung");
+                    b.HasIndex("MaNguoiDung");
 
                     b.ToTable("Orders", (string)null);
                 });
@@ -160,11 +217,13 @@ namespace ASM_WebBanNuocUong.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("HoTen")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("MatKhau")
                         .IsRequired()
@@ -173,14 +232,30 @@ namespace ASM_WebBanNuocUong.Migrations
                     b.Property<DateTime>("NgaySinh")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("NgayTao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
                     b.Property<string>("SoDienThoai")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("TrangThai")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("VaiTro")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Customer");
 
                     b.HasKey("MaNguoiDung");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Users", (string)null);
                 });
@@ -192,10 +267,8 @@ namespace ASM_WebBanNuocUong.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ChuDe")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("DanhMucMaDanhMuc")
-                        .HasColumnType("uniqueidentifier");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("Gia")
                         .HasPrecision(18, 2)
@@ -208,15 +281,36 @@ namespace ASM_WebBanNuocUong.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("MoTa")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("NgayCapNhat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayTao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<int>("SoLuongTon")
+                        .HasColumnType("int");
 
                     b.Property<string>("TenSanPham")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("TrangThai")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.HasKey("MaSanPham");
 
-                    b.HasIndex("DanhMucMaDanhMuc");
+                    b.HasIndex("MaDanhMuc");
+
+                    b.HasIndex("TenSanPham")
+                        .IsUnique();
 
                     b.ToTable("Products", (string)null);
                 });
@@ -225,11 +319,15 @@ namespace ASM_WebBanNuocUong.Migrations
                 {
                     b.HasOne("ASM_WebBanNuocUong.Models.Combo", "Combo")
                         .WithMany("DanhSachChiTietCombo")
-                        .HasForeignKey("ComboMaCombo");
+                        .HasForeignKey("MaCombo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ASM_WebBanNuocUong.Models.SanPham", "SanPham")
-                        .WithMany()
-                        .HasForeignKey("SanPhamMaSanPham");
+                        .WithMany("DanhSachChiTietCombo")
+                        .HasForeignKey("MaSanPham")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Combo");
 
@@ -238,13 +336,23 @@ namespace ASM_WebBanNuocUong.Migrations
 
             modelBuilder.Entity("ASM_WebBanNuocUong.Models.ChiTietDonHang", b =>
                 {
+                    b.HasOne("ASM_WebBanNuocUong.Models.Combo", "Combo")
+                        .WithMany("DanhSachChiTietDonHang")
+                        .HasForeignKey("MaCombo")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("ASM_WebBanNuocUong.Models.DonHang", "DonHang")
                         .WithMany("DanhSachChiTiet")
-                        .HasForeignKey("DonHangMaDonHang");
+                        .HasForeignKey("MaDonHang")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ASM_WebBanNuocUong.Models.SanPham", "SanPham")
-                        .WithMany()
-                        .HasForeignKey("SanPhamMaSanPham");
+                        .WithMany("DanhSachChiTietDonHang")
+                        .HasForeignKey("MaSanPham")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Combo");
 
                     b.Navigation("DonHang");
 
@@ -254,8 +362,10 @@ namespace ASM_WebBanNuocUong.Migrations
             modelBuilder.Entity("ASM_WebBanNuocUong.Models.DonHang", b =>
                 {
                     b.HasOne("ASM_WebBanNuocUong.Models.NguoiDung", "NguoiDung")
-                        .WithMany()
-                        .HasForeignKey("NguoiDungMaNguoiDung");
+                        .WithMany("DanhSachDonHang")
+                        .HasForeignKey("MaNguoiDung")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("NguoiDung");
                 });
@@ -264,7 +374,9 @@ namespace ASM_WebBanNuocUong.Migrations
                 {
                     b.HasOne("ASM_WebBanNuocUong.Models.DanhMuc", "DanhMuc")
                         .WithMany("DanhSachSanPham")
-                        .HasForeignKey("DanhMucMaDanhMuc");
+                        .HasForeignKey("MaDanhMuc")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("DanhMuc");
                 });
@@ -272,6 +384,8 @@ namespace ASM_WebBanNuocUong.Migrations
             modelBuilder.Entity("ASM_WebBanNuocUong.Models.Combo", b =>
                 {
                     b.Navigation("DanhSachChiTietCombo");
+
+                    b.Navigation("DanhSachChiTietDonHang");
                 });
 
             modelBuilder.Entity("ASM_WebBanNuocUong.Models.DanhMuc", b =>
@@ -282,6 +396,18 @@ namespace ASM_WebBanNuocUong.Migrations
             modelBuilder.Entity("ASM_WebBanNuocUong.Models.DonHang", b =>
                 {
                     b.Navigation("DanhSachChiTiet");
+                });
+
+            modelBuilder.Entity("ASM_WebBanNuocUong.Models.NguoiDung", b =>
+                {
+                    b.Navigation("DanhSachDonHang");
+                });
+
+            modelBuilder.Entity("ASM_WebBanNuocUong.Models.SanPham", b =>
+                {
+                    b.Navigation("DanhSachChiTietCombo");
+
+                    b.Navigation("DanhSachChiTietDonHang");
                 });
 #pragma warning restore 612, 618
         }

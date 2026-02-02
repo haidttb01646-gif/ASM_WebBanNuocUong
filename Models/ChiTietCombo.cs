@@ -9,4 +9,5 @@ public class ChiTietCombo {
     public virtual Combo? Combo { get; set; }
     public Guid MaSanPham { get; set; }
     public virtual SanPham? SanPham { get; set; }
+    public int SoLuong { get; set; } = 1;
 }
