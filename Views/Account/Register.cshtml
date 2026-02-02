@@ -1,0 +1,39 @@
+@model ASM_WebBanNuocUong.Models.User
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 shadow-lg p-4 rounded-3 bg-white">
+            <h2 class="text-center text-primary mb-4">Đăng Ký Thành Viên</h2>
+            <form>
+                <div class="mb-3">
+                    <label class="form-label">1. Họ và Tên</label>
+                    <input type="text" class="form-control" placeholder="Nguyễn Văn A">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">2. Email (Dùng để đăng nhập)</label>
+                    <input type="email" class="form-control" placeholder="name@example.com">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">3. Mật khẩu</label>
+                    <input type="password" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">4. Số điện thoại</label>
+                    <input type="tel" class="form-control" placeholder="090xxxxxxx">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">5. Địa chỉ</label>
+                    <input type="text" class="form-control" placeholder="Số nhà, tên đường...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">6. Ngày sinh</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="d-grid">
+                    <button type="button" class="btn btn-primary btn-lg">Đăng Ký ngay</button>
+                </div>
+                <p class="text-center mt-3">Đã có tài khoản? <a asp-action="Login">Đăng nhập</a></p>
+            </form>
+        </div>
+    </div>
+</div>
